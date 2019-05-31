@@ -25,15 +25,3 @@ class BaseScraper:
             raise e
 
         return soup
-
-    def get_current_for_sale(self):
-        pass
-
-    def get_current_wanted_by(self):
-        pass
-
-    def get_issue_facts(self):
-        pass
-
-    def get_story_summary(self):
-        pass
