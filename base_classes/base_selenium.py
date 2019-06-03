@@ -5,6 +5,10 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 class BaseSelenium:
+    """
+    For selenium classes, actions will mutate the the state of the browser.
+    Going to the next page for example moves the browser to the next page.
+    """
 
     def __init__(self, url_to_scrape):
         chrome_options = Options()
@@ -13,3 +17,6 @@ class BaseSelenium:
         self.browser.get(url_to_scrape)
 
         self.action = ActionChains(self.browser)
+
+    def __del__(self):
+        self.browser.close()
