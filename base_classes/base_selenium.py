@@ -13,6 +13,9 @@ class BaseSelenium:
     def __init__(self, url_to_scrape):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--disable-gpu')
+        prefs = {"profile.default_content_setting_values.notifications": 2}
+        chrome_options.add_experimental_option("prefs", prefs)
         self.browser = webdriver.Chrome(options=chrome_options)
         self.browser.get(url_to_scrape)
 
