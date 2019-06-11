@@ -134,10 +134,11 @@ class FindItemsAdvanced(object):
 
         endpoint_with_pagination = self.endpoint.format(page_number=self.page_number)
         response = requests.get(endpoint_with_pagination).json()['findItemsAdvancedResponse'][0]
-        self._content = response['searchResult'][0]['item']
-        self._content_page_number = self.page_number
 
         self.total_pages = int(response['paginationOutput'][0]['totalPages'][0])
         self.total_entries = int(response['paginationOutput'][0]['totalEntries'][0])
+
+        self._content = response['searchResult'][0]['item']
+        self._content_page_number = self.page_number
 
         return self._content
