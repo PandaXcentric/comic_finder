@@ -1,8 +1,10 @@
 
 from base_classes.base_selenium import BaseSelenium
 
+
 class PageException(Exception):
     pass
+
 
 class SeriesPage(BaseSelenium):
     url_root = 'https://atomicavenue.com/atomic'
