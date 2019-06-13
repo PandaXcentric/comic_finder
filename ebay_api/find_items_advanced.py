@@ -1,4 +1,5 @@
 import requests
+import urllib
 from ebay_api.constants import Constants
 
 
@@ -8,23 +9,25 @@ class FindItemsAdvanced(object):
     https://developer.ebay.com/Devzone/finding/CallRef/findItemsAdvanced.html#Samples
     """
     operation_name = 'findItemsAdvanced'
+    service_version = '1.9.0'
     app_name = Constants.ebay_app_name
+    description_search = 'true'
 
     endpoint = f"http://svcs.ebay.com/services/search/FindingService/v1?" \
                f"OPERATION-NAME={operation_name}&" \
-               f"SERVICE-VERSION=1.0.0&" \
+               f"SERVICE-VERSION={service_version}&" \
                f"SECURITY-APPNAME={app_name}&" \
                f"RESPONSE-DATA-FORMAT=JSON&" \
                f"REST-PAYLOAD&" \
                f"keywords={{query_string}}&" \
                f"categoryId={{category_id}}&" \
-               f"descriptionSearch={{description_search}}&" \
+               f"descriptionSearch={description_search}&" \
                f"paginationInput.entriesPerPage={{entries_per_page}}&" \
                f"paginationInput.pageNumber={{{{page_number}}}}"
 
-    query_string = None
-    category_id = 63 #Collectible-Comics
-    description_search = 'true'
+    original_query_string = None
+    url_encoded_query_string = None
+    category_id = 63 #Collectibles:Comics
 
     entries_per_page = 2
     page_number = 1
@@ -34,8 +37,9 @@ class FindItemsAdvanced(object):
     _content = None
     _content_page_number = None
 
-    def __init__(self, keywords=[], category_id=None, entries_per_page=None):
-        self.query_string = '%'.join([str(word) for word in keywords])
+    def __init__(self, query_string, category_id=None, entries_per_page=None):
+        self.original_query_string = str(query_string)
+        self.url_encoded_query_string = urllib.parse.quote_plus(self.original_query_string)
 
         if category_id:
             self.category_id = category_id
@@ -44,9 +48,8 @@ class FindItemsAdvanced(object):
             self.entries_per_page = entries_per_page
 
         self.endpoint = self.endpoint.format(
-            query_string=self.query_string,
+            query_string=self.url_encoded_query_string,
             category_id=self.category_id,
-            description_search=self.description_search,
             entries_per_page=self.entries_per_page
         )
 
