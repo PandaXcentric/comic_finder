@@ -3,6 +3,9 @@
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 
+# ignore virtual venironment
+venv/
+
 # ignore .DS_Store
 .DS_Store
 ._.DS_Store
@@ -86,3 +89,6 @@ target/
 
 gaenv_lib/
 appengine_config.py
+
+# Config files
+config.yml
