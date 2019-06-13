@@ -5,6 +5,7 @@ from base_classes.base_scraper import BaseScraper
 class FirstIssueException(Exception):
     pass
 
+
 class LastIssueException(Exception):
     pass
 
