@@ -12,55 +12,60 @@ class FindItemsAdvanced(object):
     service_version = '1.9.0'
     app_name = Constants.ebay_app_name
     description_search = 'true'
-
-    endpoint = f"http://svcs.ebay.com/services/search/FindingService/v1?" \
-               f"OPERATION-NAME={operation_name}&" \
-               f"SERVICE-VERSION={service_version}&" \
-               f"SECURITY-APPNAME={app_name}&" \
-               f"RESPONSE-DATA-FORMAT=JSON&" \
-               f"REST-PAYLOAD&" \
-               f"keywords={{query_string}}&" \
-               f"categoryId={{category_id}}&" \
-               f"descriptionSearch={description_search}&" \
-               f"paginationInput.entriesPerPage={{entries_per_page}}&" \
-               f"paginationInput.pageNumber={{{{page_number}}}}"
-
-    original_query_string = None
-    url_encoded_query_string = None
     category_id = 63 #Collectibles:Comics
+    default_entries_per_page = 2
+    initial_page_number = 1
 
-    entries_per_page = 2
-    page_number = 1
-    total_pages = None
-    total_entries = None
+    generic_endpoint = f"http://svcs.ebay.com/services/search/FindingService/v1?" \
+                       f"OPERATION-NAME={operation_name}&" \
+                       f"SERVICE-VERSION={service_version}&" \
+                       f"SECURITY-APPNAME={app_name}&" \
+                       f"RESPONSE-DATA-FORMAT=JSON&" \
+                       f"REST-PAYLOAD&" \
+                       f"keywords={{query_string}}&" \
+                       f"categoryId={category_id}&" \
+                       f"descriptionSearch={description_search}&" \
+                       f"paginationInput.entriesPerPage={{entries_per_page}}&" \
+                       f"paginationInput.pageNumber={{{{page_number}}}}"
 
-    _content = None
-    _content_page_number = None
-
-    def __init__(self, query_string, category_id=None, entries_per_page=None):
+    def __init__(self, query_string, entries_per_page=None, page_number=None):
         self.original_query_string = str(query_string)
         self.url_encoded_query_string = urllib.parse.quote_plus(self.original_query_string)
 
-        if category_id:
-            self.category_id = category_id
-
+        self.entries_per_page = self.default_entries_per_page
         if entries_per_page:
             self.entries_per_page = entries_per_page
 
-        self.endpoint = self.endpoint.format(
+        self.page_number = self.initial_page_number
+        if page_number:
+            self.page_number = page_number
+
+        self.total_pages = None
+        self.total_entries = None
+
+        self.content = None
+        self._content_page_number = None
+
+        self._endpoint = self.generic_endpoint.format(
             query_string=self.url_encoded_query_string,
-            category_id=self.category_id,
             entries_per_page=self.entries_per_page
         )
 
+        self.load_content()
+
     def next_page(self):
         self.page_number += 1
+        self.load_content()
 
     def previous_page(self):
         self.page_number -= 1
+        self.load_content()
 
-    @property
-    def content(self):
+    def go_to_page(self, page_number):
+        self.page_number=page_number
+        self.load_content()
+
+    def load_content(self):
         """
         Sample content:
             [
@@ -133,15 +138,16 @@ class FindItemsAdvanced(object):
             ]
         """
         if self._content_page_number == self.page_number:
-            return self._content
+            return
 
-        endpoint_with_pagination = self.endpoint.format(page_number=self.page_number)
-        response = requests.get(endpoint_with_pagination).json()['findItemsAdvancedResponse'][0]
+        response = requests.get(self.endpoint).json()['findItemsAdvancedResponse'][0]
 
         self.total_pages = int(response['paginationOutput'][0]['totalPages'][0])
         self.total_entries = int(response['paginationOutput'][0]['totalEntries'][0])
 
-        self._content = response['searchResult'][0]['item']
+        self.content = response['searchResult'][0]['item']
         self._content_page_number = self.page_number
 
-        return self._content
+    @property
+    def endpoint(self):
+        return self._endpoint.format(page_number=self.page_number)
