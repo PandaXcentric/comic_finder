@@ -10,9 +10,11 @@ class PublisherPage(BaseScraper):
     url_root = 'https://atomicavenue.com'
     publisher_root = '/atomic/SearchTitles.aspx?XT=0&P='
 
-    def __init__(self, publisher='Marvel'):
-        self.publisher
-        super(PublisherPage, self).__init__(self.publisher_root + publisher)
+    def __init__(self, url_to_scrape=None, publisher=None):
+        if publisher is not None:
+            super(PublisherPage, self).__init__(self.publisher_root + publisher)
+        else:
+            super(PublisherPage, self).__init__(url_to_scrape)
 
     def get_series_on_page(self):
         publisher_comics = []
@@ -44,5 +46,5 @@ class PublisherPage(BaseScraper):
         if prev_a is None:
             raise PageException("you're on the first page")
 
-        return PublisherPage("{}/atomic/{}".format(self.url_root, prev_a))
+        return PublisherPage(url_to_scrape="{}/atomic/{}".format(self.url_root, prev_a))
 
